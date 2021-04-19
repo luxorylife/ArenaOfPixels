@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android">
+
+    <item
+        android:id="@+id/navigation"
+        android:title="@string/account"
+        android:icon="@drawable/ic_action_name"/>
+
+    <item
+        android:id="@+id/arenaFragment"
+        android:title="@string/arena"
+        android:icon="@drawable/abc_vector_test" />
+
+    <item
+        android:id="@+id/ratingFragment"
+        android:title="@string/rating"
+        android:icon="@drawable/ic_action_rating"/>
+
+</menu>

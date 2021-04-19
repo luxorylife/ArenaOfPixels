@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="utf-8"?>
+<navigation xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/nav_graph"
+    app:startDestination="@id/arenaFragment">
+
+    <fragment
+        android:id="@+id/arenaFragment"
+        android:name="com.example.arenaofpixels.ArenaFragment"
+        android:label="fragment_arena"
+        tools:layout="@layout/fragment_arena" />
+    <fragment
+        android:id="@+id/ratingFragment"
+        android:name="com.example.arenaofpixels.RatingFragment"
+        android:label="fragment_rating"
+        tools:layout="@layout/fragment_rating" />
+    <navigation
+        android:id="@+id/navigation"
+        app:startDestination="@id/homeFragment">
+        <fragment
+            android:id="@+id/homeFragment"
+            android:name="com.example.arenaofpixels.HomeFragment"
+            android:label="fragment_home"
+            tools:layout="@layout/fragment_home" >
+            <action
+                android:id="@+id/action_homeFragment_to_createFragment"
+                app:destination="@id/createFragment" />
+        </fragment>
+        <fragment
+            android:id="@+id/createFragment"
+            android:name="com.example.arenaofpixels.CreateFragment"
+            android:label="fragment_create"
+            tools:layout="@layout/fragment_create" />
+    </navigation>
+</navigation>

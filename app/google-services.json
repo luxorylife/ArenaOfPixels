@@ -1,0 +1,47 @@
+{
+  "project_info": {
+    "project_number": "547865546140",
+    "project_id": "arenaofpixels",
+    "storage_bucket": "arenaofpixels.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:547865546140:android:f71f27199205bf21c5cc59",
+        "android_client_info": {
+          "package_name": "com.example.arenaofpixels"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "547865546140-920ve3014nu5aovk8glk8vj5ac79siul.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.example.arenaofpixels",
+            "certificate_hash": "52166f76f59612f3ec561838de6641fc0ab59b02"
+          }
+        },
+        {
+          "client_id": "547865546140-31so61lmquoce104vokegsmk0cgeo3uv.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyB7XhvX3Lh-sqJWHdnieVPkVy26QOnbGgE"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "547865546140-31so61lmquoce104vokegsmk0cgeo3uv.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

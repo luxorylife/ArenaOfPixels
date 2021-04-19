@@ -1,0 +1,8 @@
+<resources>
+    <string name="app_name">ArenaOfPixels</string>
+    <string name="account">Профиль</string>
+    <string name="arena">Арена</string>
+    <string name="rating">Рейтинг</string>
+    <!-- TODO: Remove or change this placeholder text -->
+    <string name="hello_blank_fragment">Hello blank fragment</string>
+</resources>
