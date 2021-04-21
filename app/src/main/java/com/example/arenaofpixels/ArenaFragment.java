@@ -94,21 +94,7 @@ public class ArenaFragment extends Fragment {
             @Override
             public void onClick(View v) {
                 //я не знаю, как, но это работает
-               handler.postDelayed(new Runnable() {
-                   @Override
-                   public void run() {
-                        animeAdd();
-                   }
-               }, 1000);
-
-               animeDelete();
-
-            }
-        });
-
-        imageView_2.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
+                animeDelete();
 
                 handler.postDelayed(new Runnable() {
                     @Override
@@ -117,7 +103,38 @@ public class ArenaFragment extends Fragment {
                     }
                 }, 1000);
 
+                handler.postDelayed(new Runnable() {
+                    @Override
+                    public void run() {
+                        imageView_1.setClickable(true);
+                        imageView_2.setClickable(true);
+                    }
+                }, 2000);
+
+            }
+        });
+
+        imageView_2.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+
                 animeDelete();
+
+                handler.postDelayed(new Runnable() {
+                    @Override
+                    public void run() {
+                        animeAdd();
+                    }
+                }, 1000);
+
+                handler.postDelayed(new Runnable() {
+                    @Override
+                    public void run() {
+                        imageView_1.setClickable(true);
+                        imageView_2.setClickable(true);
+                    }
+                }, 2000);
+
             }
         });
 
@@ -126,6 +143,8 @@ public class ArenaFragment extends Fragment {
 
     private void animeDelete(){
         if (imageView_2 != null && imageView_1 != null) {
+            imageView_1.setClickable(false);
+            imageView_2.setClickable(false);
             imageView_1.animate().translationYBy(100).alpha(0).setDuration(1000);
             imageView_2.animate().translationYBy(100).alpha(0).setDuration(1000);
         }
@@ -133,8 +152,8 @@ public class ArenaFragment extends Fragment {
 
     private void animeAdd(){
         if (imageView_2 != null && imageView_1 != null) {
-            imageView_1.animate().translationYBy(-100).alpha(1).setDuration(1000).setStartDelay(1000);
-            imageView_2.animate().translationYBy(-100).alpha(1).setDuration(1000).setStartDelay(1000);
+            imageView_1.animate().translationYBy(-100).alpha(1).setDuration(1000);
+            imageView_2.animate().translationYBy(-100).alpha(1).setDuration(1000);
         }
     }
 }

@@ -125,8 +125,8 @@ public class CreateFragment extends Fragment {
         databaseReference.child("Urls").child(Resources.email.replace(".", "")).addValueEventListener(new ValueEventListener() {
             @Override
             public void onDataChange(@NonNull DataSnapshot snapshot) {
-                GenericTypeIndicator<HashMap<String,String>> r = new GenericTypeIndicator<HashMap<String,String>>() {};
-                HashMap<String,String> map = snapshot.getValue(r);
+//                GenericTypeIndicator<HashMap<String,String>> r = new GenericTypeIndicator<HashMap<String,String>>() {};
+//                HashMap<String,String> map = snapshot.getValue(r);
 
 //                for (Map.Entry<String, String> entry : map.entrySet()) {
 //                   System.out.println(entry.getKey() + " " + entry.getValue());
@@ -163,7 +163,7 @@ public class CreateFragment extends Fragment {
             public void onClick(View v) {
                 if (imageUri != null){
 
-                    UploadTask uploadTask = storageReference.child("images/" + Resources.email + "/1").putFile(imageUri);
+                    UploadTask uploadTask = storageReference.child("images/" + Resources.email + "/" + (Resources.currentNum + 1)).putFile(imageUri);
 
                     uploadTask.addOnSuccessListener(new OnSuccessListener<UploadTask.TaskSnapshot>() {
                         @Override
@@ -179,15 +179,16 @@ public class CreateFragment extends Fragment {
                                 throw task.getException();
                             }
                             // Continue with the task to get the download URL
-                            return storageReference.child("images/" + Resources.email + "/1").getDownloadUrl();
+                            return storageReference.child("images/" + Resources.email + "/" + (Resources.currentNum + 1)).getDownloadUrl();
                         }
                     }).addOnCompleteListener(new OnCompleteListener<Uri>() {
                         @Override
                         public void onComplete(@NonNull Task<Uri> task) {
                             if (task.isSuccessful()) {
+                                System.out.println("tut");
                                 databaseReference.child("Urls").child(Resources.email.replace(".","")).push().setValue(task.getResult().toString());
-                                pictureButton.setImageURI(task.getResult());
                             } else {
+                                System.out.println("ne tut");
                                 System.out.println(task.getException());
                             }
                         }

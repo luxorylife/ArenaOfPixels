@@ -4,16 +4,23 @@ import android.content.Intent;
 import android.os.Bundle;
 
 import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
 import androidx.navigation.Navigation;
 import androidx.navigation.fragment.NavHostFragment;
+import androidx.recyclerview.widget.GridLayoutManager;
+import androidx.recyclerview.widget.LinearLayoutManager;
+import androidx.recyclerview.widget.RecyclerView;
 
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
+import android.widget.ImageView;
 import android.widget.TextView;
 
+import com.example.arenaofpixels.adapter.MyAdapter;
 import com.google.android.gms.auth.api.Auth;
 import com.google.android.gms.auth.api.signin.GoogleSignIn;
 import com.google.android.gms.auth.api.signin.GoogleSignInApi;
@@ -23,7 +30,18 @@ import com.google.android.gms.common.api.GoogleApi;
 import com.google.android.gms.common.api.GoogleApiClient;
 import com.google.android.gms.common.api.ResultCallback;
 import com.google.android.gms.common.api.Status;
+import com.google.android.gms.tasks.Task;
 import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.database.ChildEventListener;
+import com.google.firebase.database.DataSnapshot;
+import com.google.firebase.database.DatabaseError;
+import com.google.firebase.database.DatabaseReference;
+import com.google.firebase.database.FirebaseDatabase;
+import com.google.firebase.database.GenericTypeIndicator;
+import com.google.firebase.database.ValueEventListener;
+
+import java.util.ArrayList;
+import java.util.HashMap;
 
 /**
  * A simple {@link Fragment} subclass.
@@ -32,7 +50,10 @@ import com.google.firebase.auth.FirebaseAuth;
  */
 public class HomeFragment extends Fragment {
 
-    TextView tv;
+    private DatabaseReference dbRef;
+
+    private RecyclerView recyclerView;
+    private TextView tv;
 
     // TODO: Rename parameter arguments, choose names that match
     // the fragment initialization parameters, e.g. ARG_ITEM_NUMBER
@@ -80,6 +101,38 @@ public class HomeFragment extends Fragment {
         // Inflate the layout for this fragment
 
         final View root = inflater.inflate(R.layout.fragment_home, container, false);
+
+        recyclerView = root.findViewById(R.id.recycler);
+
+        dbRef = FirebaseDatabase.getInstance().getReference();
+
+//        Task<DataSnapshot> task = dbRef.child("Urls").get();
+//        for (DataSnapshot postSnapshot: task.getResult().getChildren()) {
+//            String post = postSnapshot.getValue(String.class);
+//            Log.e("Get Data", post);
+//        }
+        dbRef.child("Urls").child(Resources.email.replace(".", "")).addValueEventListener(new ValueEventListener() {
+            @Override
+            public void onDataChange(@NonNull DataSnapshot snapshot) {
+                Resources.setCurrentNum(snapshot.getChildrenCount());
+                GenericTypeIndicator<HashMap<String,String>> r = new GenericTypeIndicator<HashMap<String,String>>() {};
+                Resources.imageMap = snapshot.getValue(r);
+
+                if (Resources.imageMap != null){
+                    MyAdapter adapter = new MyAdapter(getContext(), new ArrayList<String>(Resources.imageMap.values()));
+
+                    System.out.println(Resources.imageMap);
+                    recyclerView.setAdapter(adapter);
+                    recyclerView.setLayoutManager(new GridLayoutManager(getContext(), 3));
+                }
+            }
+
+            @Override
+            public void onCancelled(@NonNull DatabaseError error) {
+
+            }
+        });
+
 
         tv = (TextView) root.findViewById(R.id.textView);
         tv.setText(Resources.email);
