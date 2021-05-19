@@ -37,6 +37,6 @@ public class MainActivity extends AppCompatActivity {
             }
         });
 
-        Resources.setEmail(FirebaseAuth.getInstance().getCurrentUser().getEmail());
     }
+
 }

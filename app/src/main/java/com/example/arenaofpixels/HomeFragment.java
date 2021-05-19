@@ -1,38 +1,34 @@
 package com.example.arenaofpixels;
 
+import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
 
 import androidx.annotation.NonNull;
-import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
-import androidx.navigation.Navigation;
 import androidx.navigation.fragment.NavHostFragment;
 import androidx.recyclerview.widget.GridLayoutManager;
-import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
-import android.util.Log;
+import android.os.IBinder;
 import android.view.LayoutInflater;
+import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.WindowManager;
+import android.view.inputmethod.InputMethodManager;
+import android.widget.AdapterView;
 import android.widget.Button;
-import android.widget.ImageView;
+import android.widget.EditText;
 import android.widget.TextView;
+import android.widget.Toast;
 
-import com.example.arenaofpixels.adapter.MyAdapter;
-import com.google.android.gms.auth.api.Auth;
+import com.example.arenaofpixels.homeAdapter.MyAdapter;
 import com.google.android.gms.auth.api.signin.GoogleSignIn;
-import com.google.android.gms.auth.api.signin.GoogleSignInApi;
-import com.google.android.gms.auth.api.signin.GoogleSignInClient;
 import com.google.android.gms.auth.api.signin.GoogleSignInOptions;
-import com.google.android.gms.common.api.GoogleApi;
-import com.google.android.gms.common.api.GoogleApiClient;
-import com.google.android.gms.common.api.ResultCallback;
-import com.google.android.gms.common.api.Status;
-import com.google.android.gms.tasks.Task;
+import com.google.android.material.floatingactionbutton.FloatingActionButton;
+import com.google.android.material.textfield.TextInputLayout;
 import com.google.firebase.auth.FirebaseAuth;
-import com.google.firebase.database.ChildEventListener;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
@@ -48,12 +44,16 @@ import java.util.HashMap;
  * Use the {@link HomeFragment#newInstance} factory method to
  * create an instance of this fragment.
  */
-public class HomeFragment extends Fragment {
+public class HomeFragment extends Fragment implements MyAdapter.MyClick{
 
     private DatabaseReference dbRef;
 
     private RecyclerView recyclerView;
-    private TextView tv;
+
+    private EditText til;
+    private FloatingActionButton faButton;
+
+    private boolean nickClick = false;
 
     // TODO: Rename parameter arguments, choose names that match
     // the fragment initialization parameters, e.g. ARG_ITEM_NUMBER
@@ -111,17 +111,28 @@ public class HomeFragment extends Fragment {
 //            String post = postSnapshot.getValue(String.class);
 //            Log.e("Get Data", post);
 //        }
-        dbRef.child("Urls").child(Resources.email.replace(".", "")).addValueEventListener(new ValueEventListener() {
+        dbRef.child("Users").child(Resources.email.replace(".", "")).child("imgs").addListenerForSingleValueEvent(new ValueEventListener() {
             @Override
             public void onDataChange(@NonNull DataSnapshot snapshot) {
-                Resources.setCurrentNum(snapshot.getChildrenCount());
-                GenericTypeIndicator<HashMap<String,String>> r = new GenericTypeIndicator<HashMap<String,String>>() {};
-                Resources.imageMap = snapshot.getValue(r);
+                GenericTypeIndicator<ArrayList<ImageObj>> r = new GenericTypeIndicator<ArrayList<ImageObj>>() {};
+
+                ArrayList<ImageObj> imgs = snapshot.getValue(r);
+
+
+                if (imgs != null) {
+                    ArrayList<ImageObj> arr = new ArrayList<>();
+                    for (int i = 0; i < imgs.size(); i++)
+                        if (!imgs.get(i).isDeleted) arr.add(imgs.get(i));
+                    Resources.setCurrentNum(imgs.size());
+                    Resources.imageMap = arr;
+                }
+
+                //System.out.println(Resources.currentNum);
 
                 if (Resources.imageMap != null){
-                    MyAdapter adapter = new MyAdapter(getContext(), new ArrayList<String>(Resources.imageMap.values()));
+                    MyAdapter adapter = new MyAdapter(getContext(), Resources.imageMap, HomeFragment.this);
 
-                    System.out.println(Resources.imageMap);
+                    //System.out.println(Resources.imageMap);
                     recyclerView.setAdapter(adapter);
                     recyclerView.setLayoutManager(new GridLayoutManager(getContext(), 3));
                 }
@@ -133,9 +144,48 @@ public class HomeFragment extends Fragment {
             }
         });
 
+        til = root.findViewById(R.id.field);
+        til.setText(Resources.nickname);
 
-        tv = (TextView) root.findViewById(R.id.textView);
-        tv.setText(Resources.email);
+        faButton = root.findViewById(R.id.buttonEdit);
+        faButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                nickClick = !nickClick;
+                if (nickClick) {
+                    faButton.setImageResource(R.drawable.ic_ready);
+                    til.setEnabled(true);
+                    til.requestFocus();
+                    //getActivity().getWindow().setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_STATE_ALWAYS_VISIBLE);
+
+                    InputMethodManager inputManager = (InputMethodManager) getContext().getSystemService(Context.INPUT_METHOD_SERVICE);
+                    inputManager.showSoftInput(til, InputMethodManager.SHOW_IMPLICIT);
+                    //((InputMethodManager)getContext().getSystemService(Context.INPUT_METHOD_SERVICE)).showSoftInput(til, 0);
+                }
+                else{
+                    if (til.getText() != null){
+                        String text = til.getText().toString();
+                        if (text.length() > 1){
+                            Resources.setNickname(text);
+                            dbRef.child("Userlist").child(Resources.email).child("nick").setValue(text);
+                        }
+                        else{
+                            Toast.makeText(getContext(), "Слишком короткий ник!", Toast.LENGTH_SHORT).show();
+                            til.setText(Resources.nickname);
+                        }
+                    }
+                    else{
+                        Toast.makeText(getContext(), "Слишком короткий ник!", Toast.LENGTH_SHORT).show();
+                        til.setText(Resources.nickname);
+                    }
+                    faButton.setImageResource(R.drawable.ic_edit);
+                    til.setEnabled(false);
+                    til.clearFocus();
+                    InputMethodManager inputManager = (InputMethodManager) getContext().getSystemService(Context.INPUT_METHOD_SERVICE);
+                    inputManager.hideSoftInputFromWindow(til.getWindowToken(), InputMethodManager.HIDE_IMPLICIT_ONLY);
+                }
+            }
+        });
 
         Button button = root.findViewById(R.id.toCreateFragment);
         button.setOnClickListener(new View.OnClickListener() {
@@ -153,15 +203,20 @@ public class HomeFragment extends Fragment {
                 GoogleSignIn.getClient(getActivity(), new GoogleSignInOptions.Builder(GoogleSignInOptions.DEFAULT_SIGN_IN).build()).signOut(); //лол это сработало
 
                 Intent intent = new Intent(getActivity(), LoginActivity.class);
-
-
+                getActivity().finish();
                 startActivity(intent);
 
-                getActivity().finish();
 
             }
         });
 
         return root;
+    }
+
+    @Override
+    public void onClick(int pos) {
+        Bundle args = new Bundle();
+        args.putSerializable("img", Resources.imageMap.get(pos));
+        NavHostFragment.findNavController(getParentFragment()).navigate(R.id.action_homeFragment_to_openImageFragment, args);
     }
 }

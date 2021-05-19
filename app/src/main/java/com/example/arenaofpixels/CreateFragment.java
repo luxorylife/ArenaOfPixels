@@ -13,16 +13,22 @@ import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.core.app.ActivityCompat;
 import androidx.fragment.app.Fragment;
+import androidx.navigation.fragment.NavHostFragment;
+import androidx.recyclerview.widget.LinearLayoutManager;
+import androidx.recyclerview.widget.RecyclerView;
 
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.ScrollView;
+import android.widget.Spinner;
 import android.widget.Toast;
 
+import com.example.arenaofpixels.sectionAdapter.SectionAdapter;
 import com.google.android.gms.tasks.Continuation;
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.OnFailureListener;
@@ -49,6 +55,7 @@ import java.net.URL;
 import java.net.URLConnection;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 /**
@@ -67,6 +74,7 @@ public class CreateFragment extends Fragment {
     public static final int PICK_IMAGE = 1;
     private Bitmap picture;
     private Uri imageUri;
+    private RecyclerView recyclerView;
 
     // TODO: Rename parameter arguments, choose names that match
     // the fragment initialization parameters, e.g. ARG_ITEM_NUMBER
@@ -118,19 +126,25 @@ public class CreateFragment extends Fragment {
         storageReference = FirebaseStorage.getInstance().getReference();
         databaseReference = FirebaseDatabase.getInstance().getReference();
 
+        recyclerView = root.findViewById(R.id.recyclerSections);
         buttonAdd = root.findViewById(R.id.button_add);
         pictureButton = root.findViewById(R.id.load_image);
         image = root.findViewById(R.id.imageView);
 
-        databaseReference.child("Urls").child(Resources.email.replace(".", "")).addValueEventListener(new ValueEventListener() {
+        // чекбоксы
+        final SectionAdapter adapter = new SectionAdapter(getContext(), Resources.sections);
+        recyclerView.setAdapter(adapter);
+        recyclerView.setLayoutManager(new LinearLayoutManager(getContext()));
+
+        /*databaseReference.child("Users").child(Resources.email.replace(".", "")).child("imgs").addValueEventListener(new ValueEventListener() {
             @Override
             public void onDataChange(@NonNull DataSnapshot snapshot) {
-//                GenericTypeIndicator<HashMap<String,String>> r = new GenericTypeIndicator<HashMap<String,String>>() {};
-//                HashMap<String,String> map = snapshot.getValue(r);
+                GenericTypeIndicator<HashMap<String,String>> r = new GenericTypeIndicator<HashMap<String,String>>() {};
+                HashMap<String,String> map = snapshot.getValue(r);
 
-//                for (Map.Entry<String, String> entry : map.entrySet()) {
-//                   System.out.println(entry.getKey() + " " + entry.getValue());
-//                }
+                for (Map.Entry<String, String> entry : map.entrySet()) {
+                   System.out.println(entry.getKey() + " " + entry.getValue());
+                }
                 //test
                 //Uri uri = Uri.parse(map.get("-MYeR3hqQIueEcuR9SzB"));
                 //Picasso.with(getContext()).load(uri).rotate(90).into(image);
@@ -140,7 +154,7 @@ public class CreateFragment extends Fragment {
             public void onCancelled(@NonNull DatabaseError error) {
 
             }
-        });
+        });*/
 
         pictureButton.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -163,45 +177,62 @@ public class CreateFragment extends Fragment {
             public void onClick(View v) {
                 if (imageUri != null){
 
-                    UploadTask uploadTask = storageReference.child("images/" + Resources.email + "/" + (Resources.currentNum + 1)).putFile(imageUri);
-
-                    uploadTask.addOnSuccessListener(new OnSuccessListener<UploadTask.TaskSnapshot>() {
-                        @Override
-                        public void onSuccess(UploadTask.TaskSnapshot taskSnapshot) {
-                            Toast.makeText(getContext(), "Успех", Toast.LENGTH_SHORT).show();
+                    final List<String> sections = new ArrayList<>();
+                    int numOfChecked = 0;
+                    for (int i = 0; i < adapter.getItemCount(); i++)
+                        if (adapter.getChecked(i)){
+                            System.out.println("checked" + i);
+                            numOfChecked++;
+                            sections.add(Resources.sections[i]);
                         }
-                    });
+                    if (numOfChecked > 0) {
 
-                    uploadTask.continueWithTask(new Continuation<UploadTask.TaskSnapshot, Task<Uri>>() {
-                        @Override
-                        public Task<Uri> then(@NonNull Task<UploadTask.TaskSnapshot> task) throws Exception {
-                            if (!task.isSuccessful()) {
-                                throw task.getException();
+                        UploadTask uploadTask = storageReference.child("images/" + Resources.email + "/" + (Resources.currentNum)).putFile(imageUri);
+
+                        uploadTask.addOnSuccessListener(new OnSuccessListener<UploadTask.TaskSnapshot>() {
+                            @Override
+                            public void onSuccess(UploadTask.TaskSnapshot taskSnapshot) {
+                                Toast.makeText(getContext(), "Успех", Toast.LENGTH_SHORT).show();
                             }
-                            // Continue with the task to get the download URL
-                            return storageReference.child("images/" + Resources.email + "/" + (Resources.currentNum + 1)).getDownloadUrl();
-                        }
-                    }).addOnCompleteListener(new OnCompleteListener<Uri>() {
-                        @Override
-                        public void onComplete(@NonNull Task<Uri> task) {
-                            if (task.isSuccessful()) {
-                                System.out.println("tut");
-                                databaseReference.child("Urls").child(Resources.email.replace(".","")).push().setValue(task.getResult().toString());
-                            } else {
-                                System.out.println("ne tut");
-                                System.out.println(task.getException());
+                        });
+
+                        uploadTask.continueWithTask(new Continuation<UploadTask.TaskSnapshot, Task<Uri>>() {
+                            @Override
+                            public Task<Uri> then(@NonNull Task<UploadTask.TaskSnapshot> task) throws Exception {
+                                if (!task.isSuccessful()) {
+                                    throw task.getException();
+                                }
+                                // Continue with the task to get the download URL
+                                return storageReference.child("images/" + Resources.email + "/" + (Resources.currentNum)).getDownloadUrl();
                             }
-                        }
-                    });
+                        }).addOnCompleteListener(new OnCompleteListener<Uri>() {
+                            @Override
+                            public void onComplete(@NonNull Task<Uri> task) {
+                                if (task.isSuccessful()) {
+                                    System.out.println("tut");
+                                    //databaseReference.child("Urls").child(Resources.email.replace(".","")).push().setValue(task.getResult().toString());
+                                    Map<String, Object> map = new HashMap<>();
+                                    map.put(String.valueOf(Resources.currentNum), new ImageObj(Resources.currentNum, task.getResult().toString(), sections, 0, 0, 0));
+                                    databaseReference.child("Users").child(Resources.email.replace(".", "")).child("imgs").updateChildren(map);
 
-                    uploadTask.addOnFailureListener(new OnFailureListener() {
-                        @Override
-                        public void onFailure(@NonNull Exception e) {
-                            Toast.makeText(getContext(), "Неудача", Toast.LENGTH_SHORT).show();
-                        }
-                    });
+                                } else {
+                                    System.out.println("ne tut");
+                                    System.out.println(task.getException());
+                                }
+                                NavHostFragment.findNavController(getParentFragment()).navigate(R.id.action_createFragment_to_homeFragment, null);
+                            }
+                        });
 
+                        uploadTask.addOnFailureListener(new OnFailureListener() {
+                            @Override
+                            public void onFailure(@NonNull Exception e) {
+                                Toast.makeText(getContext(), "Неудача", Toast.LENGTH_SHORT).show();
+                            }
+                        });
+                    }
+                    else Toast.makeText(getContext(), "Выберите категорию!", Toast.LENGTH_SHORT).show();
                 }
+
             }
         });
 

@@ -4,38 +4,77 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    tools:context=".HomeFragment">
+    android:scrollbars="vertical"
+    tools:context=".HomeFragment"
+    android:background="@color/colorBezh">
 
     <!-- TODO: Update blank fragment layout -->
 
 
-    <TextView
-        android:id="@+id/textView"
+    <ImageView
+        android:id="@+id/photo"
+        android:layout_width="125dp"
+        android:layout_height="128dp"
+        android:layout_marginLeft="13dp"
+        android:layout_marginTop="12dp"
+        android:src="@drawable/anoymus2"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent" />
+
+    <ImageView
+        android:id="@+id/rama"
+        android:layout_width="150dp"
+        android:layout_height="150dp"
+        android:src="@drawable/rama"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent" />
+
+    <EditText
+        android:id="@+id/field"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginRight="60dp"
+        android:autoSizeMaxTextSize="30dp"
+        android:enabled="false"
+        android:inputType="textShortMessage"
+        android:maxLength="15"
+        android:maxLines="1"
+        android:textSize="30dp"
+        android:textColor="@color/colorPrimary"
+        app:layout_constraintEnd_toStartOf="@+id/buttonEdit"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/photo" />
+
+    <com.google.android.material.floatingactionbutton.FloatingActionButton
+        android:id="@+id/buttonEdit"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="2222"
+        android:layout_marginTop="140dp"
+        android:clickable="true"
+        android:src="@drawable/ic_edit"
+        app:backgroundTint="@color/browser_actions_title_color"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent" />
 
     <androidx.recyclerview.widget.RecyclerView
         android:id="@+id/recycler"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:layout_marginTop="40dp"
         android:layout_marginBottom="180dp"
+        android:layout_marginTop="200dp"
         android:scrollbars="vertical"
         app:layout_constraintBottom_toTopOf="@+id/toCreateFragment"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/textView"></androidx.recyclerview.widget.RecyclerView>
+        app:layout_constraintTop_toTopOf="parent"></androidx.recyclerview.widget.RecyclerView>
 
     <Button
         android:id="@+id/toCreateFragment"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="На новый фрагмент"
-        app:layout_constraintBottom_toTopOf="@+id/sign_out"
+
+        android:text="Загрузить картинку"
+        app:layout_constraintBottom_toTopOf="@id/sign_out"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent" />
 
@@ -43,10 +82,11 @@
         android:id="@+id/sign_out"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
+        android:layout_marginBottom="70dp"
         android:text="Выйти из аккаунта"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        android:layout_marginBottom="70dp"/>
+ />
 
 </androidx.constraintlayout.widget.ConstraintLayout>

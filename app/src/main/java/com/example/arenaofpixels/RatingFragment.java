@@ -1,12 +1,23 @@
 package com.example.arenaofpixels;
 
+import android.net.Uri;
 import android.os.Bundle;
 
+import androidx.annotation.NonNull;
 import androidx.fragment.app.Fragment;
 
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.ImageView;
+import android.widget.TextView;
+
+import com.bumptech.glide.Glide;
+import com.google.firebase.database.DataSnapshot;
+import com.google.firebase.database.DatabaseError;
+import com.google.firebase.database.DatabaseReference;
+import com.google.firebase.database.FirebaseDatabase;
+import com.google.firebase.database.ValueEventListener;
 
 /**
  * A simple {@link Fragment} subclass.
@@ -14,6 +25,10 @@ import android.view.ViewGroup;
  * create an instance of this fragment.
  */
 public class RatingFragment extends Fragment {
+
+    private DatabaseReference databaseReference;
+    private ImageView winImage;
+    private TextView winsText;
 
     // TODO: Rename parameter arguments, choose names that match
     // the fragment initialization parameters, e.g. ARG_ITEM_NUMBER
@@ -59,6 +74,46 @@ public class RatingFragment extends Fragment {
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
         // Inflate the layout for this fragment
-        return inflater.inflate(R.layout.fragment_rating, container, false);
+
+        View root = inflater.inflate(R.layout.fragment_rating, container, false);
+
+        winImage = root.findViewById(R.id.imageRating);
+        winsText = root.findViewById(R.id.winsRating);
+
+        databaseReference = FirebaseDatabase.getInstance().getReference();
+        databaseReference.child("Users").addValueEventListener(new ValueEventListener() {
+            @Override
+            public void onDataChange(@NonNull DataSnapshot snapshot) {
+
+                String uri = null;
+                int wins = 0;
+
+                for (DataSnapshot s: snapshot.getChildren()){
+                    for (DataSnapshot s2: s.getChildren()){
+                        for (DataSnapshot s3: s2.getChildren()) {
+                            //System.out.println(s3.toString());
+                            ImageObj obj = s3.getValue(ImageObj.class);
+                            if (obj.wins >= wins && !obj.isDeleted) {
+                                wins = obj.wins;
+                                uri = obj.uri;
+                            }
+                        }
+                    }
+                }
+
+                if (uri != null) {
+                    Glide.with(getContext()).load(Uri.parse(uri)).into(winImage);
+                    winsText.setText("Победы: " + wins);
+                }
+
+            }
+
+            @Override
+            public void onCancelled(@NonNull DatabaseError error) {
+
+            }
+        });
+
+        return root;
     }
 }

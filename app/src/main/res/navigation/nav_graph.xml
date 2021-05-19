@@ -26,11 +26,27 @@
             <action
                 android:id="@+id/action_homeFragment_to_createFragment"
                 app:destination="@id/createFragment" />
+            <action
+                android:id="@+id/action_homeFragment_to_openImageFragment"
+                app:destination="@id/openImageFragment" />
         </fragment>
         <fragment
             android:id="@+id/createFragment"
             android:name="com.example.arenaofpixels.CreateFragment"
             android:label="fragment_create"
-            tools:layout="@layout/fragment_create" />
+            tools:layout="@layout/fragment_create" >
+            <action
+                android:id="@+id/action_createFragment_to_homeFragment"
+                app:destination="@id/homeFragment" />
+        </fragment>
+        <fragment
+            android:id="@+id/openImageFragment"
+            android:name="com.example.arenaofpixels.OpenImageFragment"
+            android:label="fragment_open_image"
+            tools:layout="@layout/fragment_open_image" >
+            <action
+                android:id="@+id/action_openImageFragment_to_homeFragment"
+                app:destination="@id/homeFragment" />
+        </fragment>
     </navigation>
 </navigation>

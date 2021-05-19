@@ -23,8 +23,19 @@ import com.google.firebase.auth.AuthResult;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.auth.GoogleAuthProvider;
+import com.google.firebase.database.DataSnapshot;
+import com.google.firebase.database.DatabaseError;
+import com.google.firebase.database.DatabaseReference;
+import com.google.firebase.database.FirebaseDatabase;
+import com.google.firebase.database.GenericTypeIndicator;
+import com.google.firebase.database.ValueEventListener;
+
+import java.util.ArrayList;
+import java.util.HashMap;
 
 public class LoginActivity extends AppCompatActivity {
+
+    private DatabaseReference dbRef;
 
     private GoogleSignInClient mGoogleSignInClient;
     private FirebaseAuth mAuth;
@@ -41,6 +52,8 @@ public class LoginActivity extends AppCompatActivity {
         setContentView(R.layout.activity_login);
 
         progressBar = findViewById(R.id.progressBar);
+
+        dbRef = FirebaseDatabase.getInstance().getReference();
 
         findViewById(R.id.sign_in_button).setOnClickListener(new View.OnClickListener() {
             @Override
@@ -97,9 +110,44 @@ public class LoginActivity extends AppCompatActivity {
                             Toast.makeText(LoginActivity.this,"Signed",Toast.LENGTH_LONG).show();
                             progressBar.setVisibility(ProgressBar.INVISIBLE);
 
-                            finish();
-                            startActivity(new Intent(LoginActivity.this, MainActivity.class));
+                            dbRef.child("Userlist").addListenerForSingleValueEvent(new ValueEventListener() {
+                                @Override
+                                public void onDataChange(@NonNull DataSnapshot snapshot) {
+                                    if (mAuth.getCurrentUser() != null) {
+                                        String email = mAuth.getCurrentUser().getEmail().replace(".", "");
+                                        Resources.setEmail(email);
+                                        System.out.println(email);
+                                        GenericTypeIndicator<HashMap<String, Person>> r = new GenericTypeIndicator<HashMap<String, Person>>() {};
+                                        HashMap<String, Person> emails = snapshot.getValue(r);
+                                        if (emails != null) {
+                                            //Resources.setUsers(emails);
+                                            if (emails.keySet().contains(email))Resources.setNickname(emails.get(email).getNick());
+                                            else {
+                                                Resources.setNickname(email.substring(0, email.indexOf("@")));
+                                                dbRef.child("Userlist").child(email).child("nick").setValue(Resources.nickname);
+                                            }
+                                        }
+                                        else {
+                                            Resources.setNickname(email.substring(0, email.indexOf("@")));
+                                            //dbRef.child("Userlist").setValue(email);
+                                            dbRef.child("Userlist").child(email).child("nick").setValue(Resources.nickname);
+                                            //emails.add(email);
+                                            //Resources.setUsers(emails);
+                                        }
+                                        Resources.numUsers = snapshot.getChildrenCount();
+                                        System.out.println("nickname: " + Resources.nickname);
+                                    }
+                                }
 
+                                @Override
+                                public void onCancelled(@NonNull DatabaseError error) {
+
+                                }
+                            });
+
+
+                            startActivity(new Intent(LoginActivity.this, MainActivity.class));
+                            finish();
                         } else {
                             progressBar.setVisibility(ProgressBar.INVISIBLE);
                             // If sign in fails, display a message to the user.
@@ -109,4 +157,5 @@ public class LoginActivity extends AppCompatActivity {
                     }
                 });
     }
+
 }
